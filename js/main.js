@@ -51,6 +51,7 @@ function App () {
                 return response.json();
             })
             .then(function(json) {
+                var chart = document.getElementById('chart').getContext('2d');
                 var elements = document.getElementsByClassName('score');
                 var max = Math.max(...json);
 
@@ -58,6 +59,16 @@ function App () {
                     elements[i].innerHTML = json[i] + '%';
                     elements[i].nextElementSibling.children[0].innerHTML = (json[i] == max) ? 'check_circle' : '';
                 }
+                new Chart(chart, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                        datasets: [{
+                            data: json,
+                            backgroundColor: ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'indigo', 'pink', 'cyan', 'teal'],
+                        }],
+                    }
+                });
             });
     };
 

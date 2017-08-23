@@ -41,7 +41,7 @@ class ML:
         data = tf.image.decode_png(data, channels=1)
         data = tf.image.resize_images(data, [IMAGE_SIZE, IMAGE_SIZE])
         data = s.run(data)
-        data = (data.astype(np.float32) - 254) / -254
+        data = (data.astype(np.float32) - 255) / -255
         self.data = data.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 1])
 
         return self
