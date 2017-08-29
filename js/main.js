@@ -41,35 +41,33 @@ function App () {
     };
 
     self.upload = function() {
-        var options = {
+        stage.update();
+        fetch('/check', {
             method  : 'POST',
             headers : {'Content-Type': 'application/json'},
             body    : JSON.stringify({image: stage.canvas.toDataURL('png')}),
-        };
-        fetch('/check', options)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(json) {
-                var chart = document.getElementById('chart').getContext('2d');
-                var elements = document.getElementsByClassName('score');
-                var max = Math.max(...json);
+        }).then(function(response) {
+            return response.json();
+        }).then(function(json) {
+            var chart = document.getElementById('chart').getContext('2d');
+            var elements = document.getElementsByClassName('score');
+            var max = Math.max(...json);
 
-                for (var i = 0; i < 10; i++) {
-                    elements[i].innerHTML = json[i] + '%';
-                    elements[i].nextElementSibling.children[0].innerHTML = (json[i] == max) ? 'check_circle' : '';
+            for (var i = 0; i < 10; i++) {
+                elements[i].innerHTML = json[i] + '%';
+                elements[i].nextElementSibling.children[0].innerHTML = (json[i] == max) ? 'check_circle' : '';
+            }
+            new Chart(chart, {
+                type: 'doughnut',
+                data: {
+                    labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    datasets: [{
+                        data: json,
+                        backgroundColor: ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'indigo', 'pink', 'cyan', 'teal'],
+                    }],
                 }
-                new Chart(chart, {
-                    type: 'doughnut',
-                    data: {
-                        labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                        datasets: [{
-                            data: json,
-                            backgroundColor: ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'indigo', 'pink', 'cyan', 'teal'],
-                        }],
-                    }
-                });
             });
+        });
     };
 
     weight.addEventListener('change', function() {
