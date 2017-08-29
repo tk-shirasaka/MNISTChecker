@@ -1,26 +1,24 @@
 function App () {
-    var stage = new createjs.Stage('stage');
     var self = this;
-    var background, shape;
+    var stage = new createjs.Stage('stage');
+    var weight = document.getElementById('strokeweight');
+    var background = new createjs.Shape();
+    var shape = new createjs.Shape();
+    var history = [];
 
     self.reset = function() {
-        shape = new createjs.Shape();
-        background = new createjs.Shape();
-        background.graphics
-            .beginStroke('White')
-            .beginFill('White')
-            .rect(0, 0, 400, 400)
-        stage.removeAllChildren();
-        stage.addChild(background, shape);
+        shape.graphics.clear();
+        history = [];
     };
 
     self.start = function(e) {
         shape.graphics
             .beginStroke('Black')
-            .setStrokeStyle(10, 'round')
+            .setStrokeStyle(weight.value, 'round')
             .moveTo(e.stageX, e.stageY);
         stage.addEventListener('stagemousemove', self.move);
         stage.addEventListener('stagemouseup', self.end);
+        history.push({f: 'beginStroke', args: ['Black']}, {f: 'moveTo', x: e.stageX, y: e.stageY});
     };
 
     self.move = function(e) {
@@ -28,16 +26,18 @@ function App () {
             .lineTo(e.stageX, e.stageY)
             .endStroke()
             .beginStroke('Black')
-            .setStrokeStyle(10, 'round')
+            .setStrokeStyle(weight.value, 'round')
             .moveTo(e.stageX, e.stageY);
+        history.push({f: 'lineTo', args: [e.stageX, e.stageY]}, {f: 'endStroke'}, {f: 'beginStroke', args: ['Black']}, {f: 'moveTo', args: [e.stageX, e.stageY]});
     };
 
     self.end = function(e) {
         shape.graphics
             .lineTo(e.stageX, e.stageY)
             .endStroke();
-         stage.removeAllEventListeners('stagemousemove');
-         stage.removeAllEventListeners('stagemouseup');
+        stage.removeAllEventListeners('stagemousemove');
+        stage.removeAllEventListeners('stagemouseup');
+        history.push({f: 'lineTo', args: [e.stageX, e.stageY]}, {f: 'endStroke'});
     };
 
     self.upload = function() {
@@ -72,9 +72,24 @@ function App () {
             });
     };
 
+    weight.addEventListener('change', function() {
+        shape.graphics
+            .clear()
+            .setStrokeStyle(weight.value, 'round');
+        history.forEach(function(op) {
+            shape.graphics[op.f](...(op.args === undefined ? [] : op.args));
+        });
+        if (history.length) self.upload();
+    });
+
     stage.addEventListener('stagemousedown', self.start);
     createjs.Ticker.addEventListener('tick', stage);
-    self.reset();
+
+    background.graphics
+        .beginStroke('White')
+        .beginFill('White')
+        .rect(0, 0, 400, 400)
+    stage.addChild(background, shape);
 };
 
 app = new App();
