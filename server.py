@@ -1,6 +1,6 @@
 import os
 import json
-#import learning
+import learning
 import base64
 from bottle import HTTPResponse, route, request, static_file, run
 
@@ -34,4 +34,4 @@ def test():
         response.set_header('Content-Type', 'image/png')
         return response
 
-run(host='0.0.0.0', port=80, debug=True)
+run(host='0.0.0.0', port=os.environ.get('PORT', 80), debug=True)
